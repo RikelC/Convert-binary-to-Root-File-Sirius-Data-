@@ -1,0 +1,29 @@
+run number = 128  // format: '119',  '119,120,..', '1-20', '1-20, 30-40', 'file', 'all'     NB: be careful not all runs have the same data format
+
+subrun number = 0-10 // format: '1' , '1,5,20,..', '0-4', '0-4,8-12' 'all' here all means up to 1000, if you put '0-1,5-10' the root files will be named with '0-10' 
+
+sum runs = no // yes or no (this will sum all runs and subruns into one ttree or histogram file)
+
+sum sub runs = yes // yes or no (for each run sum the subruns for creating a single ttree and a single histogram file)
+#----------------------------------------------------------------
+#                    file list: add files by adding lines
+#----------------------------------------------------------------
+file = run_0070.dat.30-03-22_10h19m01s 
+#----------------------------------------------------------------
+
+input file path = /data/siriusX/test/acquisition/run/
+
+output file path = ../data/
+
+Save TTree file = yes // yes or no
+
+TTree file name format = TreeTest_r-(Run)_s-(subRun)-Numexo2.root // do not remove (Run) and (subRun), everything else can be changed
+
+TTree name = rawDataTree
+
+Save histogram file = yes // yes or no 
+
+Histogram file name format = histoTest_r-(Run)_s-(subRun)-Numexo2.root // do not remove (Run) and (subRun), everything else can be changed
+
+process number of events = 2000 // eg: all, 2000
+
