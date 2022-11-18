@@ -45,7 +45,7 @@ class ReadDataFile
 		int          type;
 		int          NbItems;
 
-		int max_nEvents_to_process;
+		long int max_nEvents_to_process;
 		TFile* oTreeFile;
 		TTree* oTree = NULL;
 		void ReadUserFrame(MFMCommonFrame* commonframe);
