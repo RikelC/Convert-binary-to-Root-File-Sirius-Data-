@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
 			}
 		}
 		configFile.close();
-
+/*
 		std::cout<<"*****************************************************************"<<std::endl;
 		std::cout<<"Run numbers = "<<run_numbers<<std::endl;
 		std::cout<<"Sub Run numbers = "<<subrun_numbers<<std::endl;
@@ -115,10 +115,7 @@ int main(int argc, char *argv[])
 		std::cout<<"Sum subRuns = "<<sum_subRuns<<std::endl;
 		std::cout<<"Number of events to process = "<<number_of_events_to_process<<std::endl;
 		std::cout<<"*****************************************************************"<<std::endl;
-
-
-
-
+*/
 		//remove trailling '/'
 		if(input_dir[input_dir.length()-1]=='/'){
 
