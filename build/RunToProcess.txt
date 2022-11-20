@@ -1,3 +1,9 @@
+# line staring with '#' character are considered comments
+# all the variabales must have an '=' sign (Warning!!! do not remove the equality sign)
+# the blank spaces in the lines are ignored
+# do not rename the variables    
+# anything after '//' is a comment and is ignored
+
 run number = 128  // format: '119',  '119,120,..', '1-20', '1-20, 30-40', 'file', 'all'     NB: be careful not all runs have the same data format
 
 subrun number = 0-10 // format: '1' , '1,5,20,..', '0-4', '0-4,8-12' 'all' here all means up to 1000, if you put '0-1,5-10' the root files will be named with '0-10' 
