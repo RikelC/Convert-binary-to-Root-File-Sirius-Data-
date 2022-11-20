@@ -8,7 +8,7 @@
 #include "ReadDataFile.hh"
 //---------------ooooooooooooooo---------------ooooooooooooooo---------------ooooooooooooooo---------------
 /*!
- * To get the size of the file in kilo bytes
+ * To get the size of the file in bytes
  */
 long get_file_size(const char * filename){
 	FILE *fd = fopen(filename, "r");
