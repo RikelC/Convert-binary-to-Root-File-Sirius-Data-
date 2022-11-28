@@ -37,6 +37,7 @@ std::string * extract_oFileFormats_substrings(std::string fileFormat);
 
 bool is_a_new_run(int l, std::vector<std::string> list);
 
+void print_help();
 //---------------ooooooooooooooo---------------ooooooooooooooo---------------ooooooooooooooo---------------//
 /*!
  * The main function
@@ -102,20 +103,101 @@ int main(int argc, char *argv[])
 			}
 		}
 		configFile.close();
-/*
-		std::cout<<"*****************************************************************"<<std::endl;
-		std::cout<<"Run numbers = "<<run_numbers<<std::endl;
-		std::cout<<"Sub Run numbers = "<<subrun_numbers<<std::endl;
-		std::cout<<"Input file path = "<<input_dir<<std::endl;
-		std::cout<<"Output file path = "<<output_dir<<std::endl;
-		std::cout<<"Save TTree file = "<<save_ttree<<std::endl;
-		std::cout<<"TTree file format = "<<treeFileFormat<<std::endl;
-		std::cout<<"TTree name = "<<treeName<<std::endl;
-		std::cout<<"Sum Runs = "<<sum_runs<<std::endl;
-		std::cout<<"Sum subRuns = "<<sum_subRuns<<std::endl;
-		std::cout<<"Number of events to process = "<<number_of_events_to_process<<std::endl;
-		std::cout<<"*****************************************************************"<<std::endl;
-*/
+		
+			// overwrite the commands from Run
+		if (argc > 1){
+			const int Ncommands = 10;
+			bool flag[ Ncommands] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+			std::string command[Ncommands] = {"-r", "-s", "-sr", "-ss", "-i", "-o", "-f", "-t", "-n", "-h"};
+			std::string command2[Ncommands] = {"--runnumbers", "--subrunnumbers", "--sumruns", "--sumsubruns", "--inputdirectory", "--outputdirectory", "--treefileformat", "--treename", "--numberofeventstoprocess", "--help"};
+
+			for(int i = 0; i < argc; i++){
+				for(int cc =0; cc< Ncommands; cc++){// cc : current command
+					// Check the current command
+					if((strcmp(argv[i], command[cc].c_str()) == 0) ||
+							(strcmp(argv[i], command2[cc].c_str()) == 0)){
+						flag[cc] = true;
+						if(cc == 0) run_numbers.clear();
+						else if(cc == 1) subrun_numbers.clear();
+						else if(cc == 2) sum_runs.clear();
+						else if(cc == 3) sum_subRuns.clear();
+						else if(cc == 4) input_dir.clear();
+						else if(cc == 5) output_dir.clear();
+						else if(cc == 6) treeFileFormat.clear();
+						else if(cc == 7) treeName.clear();
+						else if(cc == 8) number_of_events_to_process.clear();
+
+						else if(cc == 9){
+							print_help();
+							filelist.clear();
+							exit(0);
+						}						
+						continue;// to skip this entry
+					}
+					if(flag[cc])
+					{
+						// Check the current command is swiched off
+						for(int oc = 0; oc< Ncommands; oc++){
+							if(oc == cc) continue;
+							if(strcmp(argv[i], command[oc].c_str()) == 0)
+								flag[cc] = false;
+						}
+
+						if(flag[cc]){
+							if(cc == 0){ if(run_numbers.empty()) run_numbers += std::string(argv[i]); else run_numbers += "," + std::string(argv[i]);}
+							else if(cc == 1){ if(subrun_numbers.empty())subrun_numbers += std::string(argv[i]); else subrun_numbers += "," + std::string(argv[i]);}
+							else if(cc == 2) sum_runs += std::string(argv[i]);
+							else if(cc == 3) sum_subRuns += std::string(argv[i]);
+							else if(cc == 4) input_dir += std::string(argv[i]);
+							else if(cc == 5) output_dir += std::string(argv[i]);
+							else if(cc == 6) treeFileFormat += std::string(argv[i]);
+							else if(cc == 7) treeName += std::string(argv[i]);
+							else if(cc == 8) number_of_events_to_process += std::string(argv[i]);
+
+						}
+
+
+					}
+
+				}
+			}
+
+// CHeck if a wrong command id given
+
+
+			to_upper(sum_runs);
+			to_upper(sum_subRuns);
+		}
+		/*
+		   std::cout<<"*****************************************************************"<<std::endl;
+		   std::cout<<"Run numbers = "<<run_numbers<<std::endl;
+		   std::cout<<"Sub Run numbers = "<<subrun_numbers<<std::endl;
+		   std::cout<<"Input file path = "<<input_dir<<std::endl;
+		   std::cout<<"Output file path = "<<output_dir<<std::endl;
+		   std::cout<<"TTree file format = "<<treeFileFormat<<std::endl;
+		   std::cout<<"TTree name = "<<treeName<<std::endl;
+		   std::cout<<"Sum Runs = "<<sum_runs<<std::endl;
+		   std::cout<<"Sum subRuns = "<<sum_subRuns<<std::endl;
+		   std::cout<<"Number of events to process = "<<number_of_events_to_process<<std::endl;
+		   std::cout<<"*****************************************************************"<<std::endl;
+		   */
+
+		// Check if input parameters are empty or wrong
+		if(run_numbers.empty() || subrun_numbers.empty() || sum_runs.empty() || sum_subRuns.empty() || input_dir.empty() || output_dir.empty() || treeFileFormat.empty() || treeName.empty() || number_of_events_to_process.empty()){
+			cout<< "\n********************* Error in the input !! ********************\n\n";
+			if(run_numbers.empty())cout<<"Check the Run numbers: is empty"<<endl;
+			else if(subrun_numbers.empty())cout<<"Check the subRun numbers: is empty"<<endl;
+			else if(sum_runs.empty() )cout<<"Check the sum Runs: is empty"<<endl;
+			else if(sum_subRuns.empty())cout<<"Check the sum subRuns: is empty"<<endl;
+			else if(input_dir.empty())cout<<"Check the input directory: is empty"<<endl;
+			else if(output_dir.empty())cout<<"Check the output directory: is empty"<<endl;
+			else if(treeFileFormat.empty())cout<<"Check the tree file format: is empty"<<endl;
+			else if(treeName.empty())cout<<"Check the tree name: is empty"<<endl;
+			else if(number_of_events_to_process.empty())cout<<"Check the number of events to process: is empty"<<endl;
+			std::cout<<"\n****************************************************************"<<std::endl;
+			filelist.clear();
+			exit(0);
+		}
 
 		//remove trailling '/'
 		if(input_dir[input_dir.length()-1]=='/'){
@@ -681,6 +763,34 @@ std::vector<std::string> get_existing_files(std::string dir, std::vector<int> li
 	return runfiles;
 }
 
+void print_help(){
+	std::cout<<"\n     To convert a run into a root file of given tree format:"
+		"\n     Modify the parameters in RunToProcess.txt file"
+		"\n                           or                      "
+		"\n     Execute via :"
+		"\n     ConvertToRootFile [OPTIONS] VALUE"
+		"\n     OPTIONS: "
+		"\n     -r, --runnumbers"
+		"\n                VALUE eg:  1 2 3 or 1-3 or 1,2,3"
+		"\n     -s, --subrunnumbers"
+		"\n                VALUE eg:  0 1 2 or 0-3 or 0,1,2 or all"
+		"\n     -sr, --sumruns"
+		"\n                VALUE eg:  yes or no (Case insensitive)"
+		"\n     -ss, --sumsubruns"
+		"\n                VALUE eg:  yes or no (Case insensitive)"
+		"\n     -i, --inputdirectory"
+		"\n                VALUE eg:  /data/siriusX/test/acquisition/run/"
+		"\n     -o, --outputdirectory" 
+		"\n                VALUE eg:  /data/siriusX/test/acquisition/RootFiles"
+		"\n     -f, --treefileformat"
+		"\n                VALUE eg:  Tree_r-(Run)_s-(subRun)-Numexo2.root.  Warning do not remove (Run) and (subRun) from the format"
+		"\n     -t, --treename"
+		"\n                VALUE eg:  rawDataTree"
+		"\n     -n, --numberofeventstoprocess"
+		"\n                VALUE eg:  1000 or all"
+		"\n     -h, --help"
+		"\n                To display a message of utilization of the program.\n"<<endl;
+}
 //----------------------------------------------------------
 // function to get the existing files in the input directory 
 //----------------------------------------------------------
