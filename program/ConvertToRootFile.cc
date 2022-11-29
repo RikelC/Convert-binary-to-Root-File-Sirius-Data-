@@ -38,6 +38,16 @@ std::string * extract_oFileFormats_substrings(std::string fileFormat);
 bool is_a_new_run(int l, std::vector<std::string> list);
 
 void print_help();
+
+struct UserOption{
+	UserOption(char * opt, bool f ){
+		Option = opt;
+		Flag = f;
+	}
+	char *Option;
+	bool Flag;
+};
+
 //---------------ooooooooooooooo---------------ooooooooooooooo---------------ooooooooooooooo---------------//
 /*!
  * The main function
@@ -48,14 +58,13 @@ int main(int argc, char *argv[])
 	std::string line,test_line, variable, value; 
 	std::string run_numbers;
 	std::string subrun_numbers;
+	std::string sum_runs;
+	std::string sum_subRuns;
 	std::string input_dir;
 	std::string output_dir;
-	std::string save_ttree;
 	std::string treeFileFormat;
 	std::string treeName;
-	std::string sum_subRuns;
 	std::string number_of_events_to_process;
-	std::string sum_runs;
 	bool equality_sign_found = 0;
 	std::vector<std::string> filelist; 
 
@@ -91,25 +100,64 @@ int main(int argc, char *argv[])
 			if(!variable.empty() && !value.empty()){
 				if(variable.compare("RUNNUMBER")==0 || variable.compare("RUNNUMBERS")==0 ){ to_upper(value); run_numbers = value;}
 				else if(variable.compare("SUBRUNNUMBER")==0 || variable.compare("SUBRUNNUMBERS")==0 ) subrun_numbers = value;
-				else if(variable.compare("INPUTFILEPATH")==0) input_dir = value;
-				else if(variable.compare("OUTPUTFILEPATH")==0) output_dir = value;
-				else if(variable.compare("SAVETTREEFILE")==0){to_upper(value);  save_ttree = value;}
-				else if(variable.compare("TTREEFILENAMEFORMAT")==0) treeFileFormat = value;
-				else if(variable.compare("TTREENAME")==0) treeName = value;
 				else if(variable.compare("SUMRUNS")==0){to_upper(value); sum_runs = value;}
 				else if(variable.compare("SUMSUBRUNS")==0){to_upper(value); sum_subRuns = value;}
+				else if(variable.compare("INPUTFILEPATH")==0) input_dir = value;
+				else if(variable.compare("OUTPUTFILEPATH")==0) output_dir = value;
+				else if(variable.compare("TTREEFILENAMEFORMAT")==0) treeFileFormat = value;
+				else if(variable.compare("TTREENAME")==0) treeName = value;
 				else if(variable.compare("PROCESSNUMBEROFEVENTS")==0){to_upper(value); number_of_events_to_process = value;}
 				else if(variable.compare("FILE")==0){filelist.push_back(value);}
 			}
 		}
 		configFile.close();
-		
-			// overwrite the commands from Run
+		// overwrite the commands from Run
 		if (argc > 1){
 			const int Ncommands = 10;
 			bool flag[ Ncommands] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 			std::string command[Ncommands] = {"-r", "-s", "-sr", "-ss", "-i", "-o", "-f", "-t", "-n", "-h"};
 			std::string command2[Ncommands] = {"--runnumbers", "--subrunnumbers", "--sumruns", "--sumsubruns", "--inputdirectory", "--outputdirectory", "--treefileformat", "--treename", "--numberofeventstoprocess", "--help"};
+
+			//Check if the commands are not correct
+			bool found = false;
+			std::vector<UserOption> options;
+			for(int i = 0; i < argc; i++){
+
+				if(argv[i][0] == '-'){
+					found = false;	
+
+					for(int cc =0; cc< Ncommands; cc++){// cc : current command
+						if((strcmp(argv[i], command[cc].c_str()) == 0) ||
+								(strcmp(argv[i], command2[cc].c_str()) == 0)){
+							found = true;
+							break;
+						}
+					}
+
+					if(!found){
+						UserOption o(argv[i], found);
+						options.push_back(o);
+					}
+				}
+
+			}
+
+			if(options.size() > 0){
+				for(unsigned int i = 0; i< options.size();i++){
+					if(options.at(i).Flag == 0){
+						cout<<"OPTION : "<<options.at(i).Option <<" is not correct. "<<endl;
+					}
+
+				}
+				cout<<"\n         For Help Type:"<<endl;
+				cout<<"                  'ConvertToRootFile -h'"<<endl;
+				cout<<"                            or          "<<endl;
+				cout<<"                  'ConvertToRootFile --help'\n"<<endl;
+                                options.clear();
+				filelist.clear();
+				exit(0);
+			}
+
 
 			for(int i = 0; i < argc; i++){
 				for(int cc =0; cc< Ncommands; cc++){// cc : current command
@@ -162,9 +210,6 @@ int main(int argc, char *argv[])
 				}
 			}
 
-// CHeck if a wrong command id given
-
-
 			to_upper(sum_runs);
 			to_upper(sum_subRuns);
 		}
@@ -198,6 +243,7 @@ int main(int argc, char *argv[])
 			filelist.clear();
 			exit(0);
 		}
+
 
 		//remove trailling '/'
 		if(input_dir[input_dir.length()-1]=='/'){
@@ -243,6 +289,7 @@ int main(int argc, char *argv[])
 			Runs.clear();
 			subRuns.clear();
 		}
+
 		// variables for output file names
 		std::string treeFileName;
 		std::string prev_treeFileName;
@@ -257,11 +304,10 @@ int main(int argc, char *argv[])
 			std::string current_file = input_dir + "/" + runfiles[l];
 			if(sum_runs == "YES" && runfiles.size() > 1){
 				if(l ==0){
-					if(save_ttree == "YES")
-						treeFileName = get_tree_filename(l, t_sub_str, output_dir, run_numbers, "all", sum_runs, sum_subRuns, runfiles, true, run_increament);
+					treeFileName = get_tree_filename(l, t_sub_str, output_dir, run_numbers, "all", sum_runs, sum_subRuns, runfiles, true, run_increament);
 
 					a = new ReadDataFile();
-					if(save_ttree == "YES")	a->initialize_ttree(treeFileName.c_str(), treeName.c_str());
+					a->initialize_ttree(treeFileName.c_str(), treeName.c_str());
 
 				}
 				a->Read(current_file.c_str(), number_of_events_to_process.c_str());
@@ -272,26 +318,23 @@ int main(int argc, char *argv[])
 				current_runN = atoi(runN.c_str());
 				current_subrunN = atoi(subRunN.c_str());
 				if(l ==0){
-					if(save_ttree == "YES")
-						treeFileName = get_tree_filename(l, t_sub_str, output_dir, runN, subRunN, sum_runs, sum_subRuns, runfiles, true, run_increament);
+					treeFileName = get_tree_filename(l, t_sub_str, output_dir, runN, subRunN, sum_runs, sum_subRuns, runfiles, true, run_increament);
 				}
 				else{
 					if(current_runN == prev_runN){// have the same run number
 						//first check if they are different runs with same run number
 						if(current_subrunN == prev_subrunN){
 							run_increament++;
-							if(save_ttree == "YES")
-								treeFileName = get_tree_filename(l, t_sub_str, output_dir, runN, subRunN, sum_runs, sum_subRuns, runfiles, true, run_increament);
+
+							treeFileName = get_tree_filename(l, t_sub_str, output_dir, runN, subRunN, sum_runs, sum_subRuns, runfiles, true, run_increament);
 						}
 						else{
 							if(is_a_new_run(l, runfiles)){
 								run_increament++;
-								if(save_ttree == "YES")
-									treeFileName = get_tree_filename(l, t_sub_str, output_dir, runN, subRunN, sum_runs, sum_subRuns, runfiles, true, run_increament);
+								treeFileName = get_tree_filename(l, t_sub_str, output_dir, runN, subRunN, sum_runs, sum_subRuns, runfiles, true, run_increament);
 							}else{
 								if(sum_subRuns == "NO"){
-									if(save_ttree == "YES")
-										treeFileName = get_tree_filename(l, t_sub_str, output_dir, runN, subRunN, sum_runs, sum_subRuns, runfiles, false, run_increament);
+									treeFileName = get_tree_filename(l, t_sub_str, output_dir, runN, subRunN, sum_runs, sum_subRuns, runfiles, false, run_increament);
 								}
 
 							}
@@ -299,8 +342,7 @@ int main(int argc, char *argv[])
 					}
 					else{//new run
 						run_increament =0;
-						if(save_ttree == "YES")
-							treeFileName = get_tree_filename(l, t_sub_str, output_dir, runN, subRunN, sum_runs, sum_subRuns, runfiles, true, run_increament);
+						treeFileName = get_tree_filename(l, t_sub_str, output_dir, runN, subRunN, sum_runs, sum_subRuns, runfiles, true, run_increament);
 					}
 				}
 				//-----------------
@@ -308,7 +350,7 @@ int main(int argc, char *argv[])
 				//  ---------------
 				if(l ==0){
 					a = new ReadDataFile();
-					if(save_ttree == "YES")	a->initialize_ttree(treeFileName.c_str(), treeName.c_str());
+					a->initialize_ttree(treeFileName.c_str(), treeName.c_str());
 				}
 				else{
 					if(current_runN == prev_runN){// have the same run number
@@ -318,14 +360,14 @@ int main(int argc, char *argv[])
 							// save old file
 							//--------------				
 							cout<<"TTree file name: "<<prev_treeFileName<<endl;
-							if(save_ttree == "YES")	a->save_ttree();
+							a->save_ttree();
 							delete a;  
 							a = NULL;
 							//-----------------
 							// open a new file
 							//-----------------
 							a = new ReadDataFile();
-							if(save_ttree == "YES")	a->initialize_ttree(treeFileName.c_str(), treeName.c_str());
+							a->initialize_ttree(treeFileName.c_str(), treeName.c_str());
 						}
 						else{//current file with diferent sub run no
 							if(is_a_new_run(l, runfiles)){
@@ -333,28 +375,28 @@ int main(int argc, char *argv[])
 								// save old file
 								//--------------				
 								cout<<"TTree file name: "<<prev_treeFileName<<endl;
-								if(save_ttree == "YES")	a->save_ttree();
+								a->save_ttree();
 								delete a;  
 								a = NULL;
 								//-----------------
 								// open a new file
 								//-----------------
 								a = new ReadDataFile();
-								if(save_ttree == "YES")	a->initialize_ttree(treeFileName.c_str(), treeName.c_str());
+								a->initialize_ttree(treeFileName.c_str(), treeName.c_str());
 							}else{
 								if(sum_subRuns == "NO"){
 									//--------------
 									//save old file
 									//---------------
 									cout<<"TTree file name: "<<prev_treeFileName<<endl;
-									if(save_ttree == "YES")	a->save_ttree();
+									a->save_ttree();
 									delete a;  
 									a = NULL;
 									//------------------
 									// open a new fiel
 									//-------------------
 									a = new ReadDataFile();
-									if(save_ttree == "YES")	a->initialize_ttree(treeFileName.c_str(), treeName.c_str());
+									a->initialize_ttree(treeFileName.c_str(), treeName.c_str());
 								}
 							}
 						}
@@ -365,12 +407,12 @@ int main(int argc, char *argv[])
 						//--------------				
 						if(sum_subRuns == "YES"){
 							cout<<"TTree file name: "<<prev_treeFileName<<endl;
-							if(save_ttree == "YES")	a->save_ttree();
+							a->save_ttree();
 							delete a;  
 							a = NULL;
 						}
 						a = new ReadDataFile();
-						if(save_ttree == "YES")	a->initialize_ttree(treeFileName.c_str(), treeName.c_str());
+						a->initialize_ttree(treeFileName.c_str(), treeName.c_str());
 					}
 				}
 				a->Read(current_file.c_str(), number_of_events_to_process.c_str());
@@ -384,11 +426,12 @@ int main(int argc, char *argv[])
 		// save last file
 		//--------------				
 		cout<<"TTree file name: "<<prev_treeFileName<<endl;
-		if(save_ttree == "YES")	a->save_ttree();
+		a->save_ttree();
 		delete a;   
 		a = NULL;
 		runfiles.clear();
 		delete[] t_sub_str;
+
 
 	}else{
 		std::cout<<"Error Run.config file not found !!!!!"<<std::endl;
