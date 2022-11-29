@@ -246,8 +246,6 @@ int main(int argc, char *argv[])
 		// variables for output file names
 		std::string treeFileName;
 		std::string prev_treeFileName;
-		std::string histFileName;
-		std::string prev_histFileName;
 		std::string *t_sub_str = extract_oFileFormats_substrings(treeFileFormat);
 		ReadDataFile *a;
 		int current_runN =0, prev_runN =0, current_subrunN =0, prev_subrunN =0, run_increament =0;
@@ -319,7 +317,7 @@ int main(int argc, char *argv[])
 							//--------------
 							// save old file
 							//--------------				
-							cout<<"TTree file name: "<<treeFileName<<endl;
+							cout<<"TTree file name: "<<prev_treeFileName<<endl;
 							if(save_ttree == "YES")	a->save_ttree();
 							delete a;  
 							a = NULL;
@@ -334,7 +332,7 @@ int main(int argc, char *argv[])
 								//--------------
 								// save old file
 								//--------------				
-								cout<<"TTree file name: "<<treeFileName<<endl;
+								cout<<"TTree file name: "<<prev_treeFileName<<endl;
 								if(save_ttree == "YES")	a->save_ttree();
 								delete a;  
 								a = NULL;
@@ -348,7 +346,7 @@ int main(int argc, char *argv[])
 									//--------------
 									//save old file
 									//---------------
-									cout<<"TTree file name: "<<treeFileName<<endl;
+									cout<<"TTree file name: "<<prev_treeFileName<<endl;
 									if(save_ttree == "YES")	a->save_ttree();
 									delete a;  
 									a = NULL;
@@ -366,7 +364,7 @@ int main(int argc, char *argv[])
 						// save old file
 						//--------------				
 						if(sum_subRuns == "YES"){
-							cout<<"TTree file name: "<<treeFileName<<endl;
+							cout<<"TTree file name: "<<prev_treeFileName<<endl;
 							if(save_ttree == "YES")	a->save_ttree();
 							delete a;  
 							a = NULL;
@@ -380,13 +378,12 @@ int main(int argc, char *argv[])
 				prev_runN = current_runN;
 				prev_subrunN = prev_subrunN;
 				prev_treeFileName = treeFileName;
-				prev_histFileName = histFileName;
 			}
 		}//file loop
 		//--------------
 		// save last file
 		//--------------				
-		cout<<"TTree file name: "<<treeFileName<<endl;
+		cout<<"TTree file name: "<<prev_treeFileName<<endl;
 		if(save_ttree == "YES")	a->save_ttree();
 		delete a;   
 		a = NULL;
